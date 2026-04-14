@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Budget</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<div class="app">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>💰 Tracker</h2>
+        <a href="/">🏠 Dashboard</a>
+        <a href="/analytics">📊 Analytics</a>
+        <a href="/budget">💰 Budget</a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <h1>💰 Budget Management</h1>
+
+        <!-- Current Budget -->
+        <div class="cards">
+            <div class="card highlight">
+                <h3>Weekly Budget</h3>
+                <p>₹{{ budget.weekly }}</p>
+            </div>
+
+            <div class="card highlight2">
+                <h3>Monthly Budget</h3>
+                <p>₹{{ budget.monthly }}</p>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="card form-card">
+            <h2>Update Budget</h2>
+
+            <form method="post">
+                <input name="weekly" placeholder="Weekly Budget" value="{{ budget.weekly }}">
+                <input name="monthly" placeholder="Monthly Budget" value="{{ budget.monthly }}">
+                <button>Save Budget</button>
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

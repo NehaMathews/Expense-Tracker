@@ -1,0 +1,154 @@
+from flask import Flask, render_template, request, redirect
+import json, os
+from datetime import datetime
+
+app = Flask(__name__)
+
+FILE = "expenses.json"
+BUDGET = "budgets.json"
+
+# ---------- Load / Save ----------
+def load():
+    if not os.path.exists(FILE):
+        return []
+    return json.load(open(FILE))
+
+def save(data):
+    json.dump(data, open(FILE, "w"), indent=4)
+
+def load_budget():
+    if not os.path.exists(BUDGET):
+        return {"weekly": 0, "monthly": 0}
+    return json.load(open(BUDGET))
+
+def save_budget(data):
+    json.dump(data, open(BUDGET, "w"), indent=4)
+
+# ---------- Dashboard ----------
+@app.route("/")
+def index():
+    data = load()
+    total = sum(e["amount"] for e in data)
+    budget = load_budget()
+    today = datetime.now()
+
+    weekly_spent = sum(e["amount"] for e in data
+        if 0 <= (today - datetime.strptime(e["date"], "%Y-%m-%d")).days < 7)
+
+    monthly_spent = sum(e["amount"] for e in data
+        if datetime.strptime(e["date"], "%Y-%m-%d").month == today.month)
+
+    weekly_remaining = budget["weekly"] - weekly_spent
+    monthly_remaining = budget["monthly"] - monthly_spent
+
+    # status logic
+    weekly_status = ""
+    if budget["weekly"] > 0:
+        percent = (weekly_spent / budget["weekly"]) * 100
+        if percent >= 100:
+            weekly_status = "exceeded"
+        elif percent >= 80:
+            weekly_status = "warning"
+
+    monthly_status = ""
+    if budget["monthly"] > 0:
+        percent = (monthly_spent / budget["monthly"]) * 100
+        if percent >= 100:
+            monthly_status = "exceeded"
+        elif percent >= 80:
+            monthly_status = "warning"
+
+    return render_template("index.html",
+        expenses=data,
+        total=total,
+        budget=budget,
+        weekly_remaining=weekly_remaining,
+        monthly_remaining=monthly_remaining,
+        weekly_status=weekly_status,
+        monthly_status=monthly_status
+    )
+
+
+# ---------- Add ----------
+@app.route("/add", methods=["POST"])
+def add():
+    data = load()
+    data.append({
+        "amount": float(request.form["amount"]),
+        "category": request.form["category"],
+        "desc": request.form["desc"],
+        "date": datetime.now().strftime("%Y-%m-%d")
+    })
+    save(data)
+    return redirect("/")
+
+# ---------- Delete ----------
+@app.route("/delete/<int:i>")
+def delete(i):
+    data = load()
+    data.pop(i)
+    save(data)
+    return redirect("/")
+
+# ---------- Edit ----------
+@app.route("/edit/<int:i>", methods=["POST"])
+def edit(i):
+    data = load()
+    data[i]["amount"] = float(request.form["amount"])
+    data[i]["category"] = request.form["category"]
+    data[i]["desc"] = request.form["desc"]
+    save(data)
+    return redirect("/")
+
+# ---------- Search ----------
+@app.route("/search", methods=["POST"])
+def search():
+    keyword = request.form["keyword"].lower()
+    data = load()
+
+    filtered = [e for e in data if keyword in e["category"].lower() or keyword in e["desc"].lower()]
+    total = sum(e["amount"] for e in filtered)
+
+    return render_template("index.html", expenses=filtered, total=total)
+
+# ---------- Budget ----------
+@app.route("/budget", methods=["GET", "POST"])
+def budget():
+    if request.method == "POST":
+        save_budget({
+            "weekly": float(request.form["weekly"]),
+            "monthly": float(request.form["monthly"])
+        })
+        return redirect("/budget")
+
+    b = load_budget()
+    return render_template("budget.html", budget=b)
+
+# ---------- Analytics ----------
+@app.route("/analytics")
+def analytics():
+    data = load()
+    today = datetime.now()
+
+    daily = sum(e["amount"] for e in data if e["date"] == today.strftime("%Y-%m-%d"))
+
+    weekly = sum(e["amount"] for e in data
+        if 0 <= (today - datetime.strptime(e["date"], "%Y-%m-%d")).days < 7)
+
+    monthly = sum(e["amount"] for e in data
+        if datetime.strptime(e["date"], "%Y-%m-%d").month == today.month)
+
+    # category totals
+    categories = {}
+    for e in data:
+        cat = e["category"]
+        categories[cat] = categories.get(cat, 0) + e["amount"]
+
+    return render_template("analytics.html",
+                           daily=daily,
+                           weekly=weekly,
+                           monthly=monthly,
+                           categories=categories)
+
+if __name__ == "__main__":
+    app.run(debug=True)

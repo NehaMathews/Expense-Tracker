@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics</title>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="app">
+
+    <div class="sidebar">
+        <h2>💰 Tracker</h2>
+        <a href="/">🏠 Dashboard</a>
+        <a href="/analytics">📊 Analytics</a>
+        <a href="/budget">💰 Budget</a>
+    </div>
+
+    <div class="main">
+
+        <h1>📊 Analytics</h1>
+
+        <!-- Summary Cards -->
+        <div class="cards">
+            <div class="card"><h3>Daily</h3><p>₹{{ daily }}</p></div>
+            <div class="card"><h3>Weekly</h3><p>₹{{ weekly }}</p></div>
+            <div class="card"><h3>Monthly</h3><p>₹{{ monthly }}</p></div>
+        </div>
+
+        <!-- Chart -->
+        <div class="card">
+            <h2>Category Breakdown</h2>
+            <canvas id="pieChart"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+<div id="categories-data" style="display:none;">{{ categories | tojson }}</div>
+
+<script>
+    var categories = JSON.parse(document.getElementById('categories-data').textContent);
+    const data = {
+        labels: Object.keys(categories),
+        datasets: [{
+            data: Object.values(categories),
+        }]
+    };
+
+    new Chart(document.getElementById("pieChart"), {
+        type: "pie",
+        data: data
+    });
+</script>
+
+</body>
+</html>

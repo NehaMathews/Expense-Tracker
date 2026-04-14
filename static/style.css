@@ -1,0 +1,131 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI';
+    background: #121212;
+    color: white;
+}
+
+/* Layout */
+.app {
+    display: flex;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 200px;
+    height: 100vh;
+    background: #1e1e2f;
+    padding: 20px;
+}
+
+.sidebar h2 {
+    margin-bottom: 30px;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    margin: 15px 0;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.sidebar a:hover {
+    background: #2e2e3e;
+}
+
+/* Main */
+.main {
+    flex: 1;
+    padding: 20px;
+}
+
+/* Cards */
+.cards {
+    display: flex;
+    gap: 20px;
+}
+
+.card {
+    background: #1e1e2f;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 12px;
+}
+
+.highlight {
+    background: linear-gradient(135deg, #4CAF50, #2ecc71);
+}
+
+.highlight2 {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+.warning {
+    color: #f1c40f;
+    font-weight: bold;
+}
+
+.danger {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* Inputs */
+input {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 6px;
+    border: none;
+}
+
+/* Button */
+button {
+    padding: 10px 15px;
+    background: #4CAF50;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.form-card {
+    max-width: 400px;
+}
+
+.form-card input {
+    display: block;
+    width: 90%;
+    margin: 10px auto;
+}
+
+.form-card button {
+    width: 50%;
+    margin-top: 10px;
+}
+
+button:hover {
+    background: #66bb6a;
+}
+
+canvas {
+    max-width: 400px;
+    margin: auto;
+}
+
+/* List */
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+}
+
+a {
+    color: red;
+    margin-left: 10px;
+}
