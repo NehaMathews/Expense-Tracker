@@ -130,25 +130,36 @@ def analytics():
     data = load()
     today = datetime.now()
 
-    daily = sum(e["amount"] for e in data if e["date"] == today.strftime("%Y-%m-%d"))
+    # -------- Monthly Trend (last 12 months) --------
+    monthly_totals = [0]*12
 
-    weekly = sum(e["amount"] for e in data
-        if 0 <= (today - datetime.strptime(e["date"], "%Y-%m-%d")).days < 7)
-
-    monthly = sum(e["amount"] for e in data
-        if datetime.strptime(e["date"], "%Y-%m-%d").month == today.month)
-
-    # category totals
-    categories = {}
     for e in data:
-        cat = e["category"]
-        categories[cat] = categories.get(cat, 0) + e["amount"]
+        d = datetime.strptime(e["date"], "%Y-%m-%d")
+        monthly_totals[d.month - 1] += e["amount"]
+
+    # -------- Yearly Trend --------
+    yearly_totals = {}
+
+    for e in data:
+        d = datetime.strptime(e["date"], "%Y-%m-%d")
+        year = d.year
+        yearly_totals[year] = yearly_totals.get(year, 0) + e["amount"]
+
+    # -------- Category Annual --------
+    category_totals = {}
+
+    for e in data:
+        d = datetime.strptime(e["date"], "%Y-%m-%d")
+
+        if d.year == today.year:  # current year only
+            cat = e["category"]
+            category_totals[cat] = category_totals.get(cat, 0) + e["amount"]
 
     return render_template("analytics.html",
-                           daily=daily,
-                           weekly=weekly,
-                           monthly=monthly,
-                           categories=categories)
+        monthly=monthly_totals,
+        yearly=yearly_totals,
+        categories=category_totals
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

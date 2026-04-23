@@ -4,13 +4,13 @@
     <title>Analytics</title>
     <link rel="stylesheet" href="/static/style.css">
 
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
 <div class="app">
 
+    <!-- Sidebar -->
     <div class="sidebar">
         <h2>💰 Tracker</h2>
         <a href="/">🏠 Dashboard</a>
@@ -18,20 +18,26 @@
         <a href="/budget">💰 Budget</a>
     </div>
 
+    <!-- Main -->
     <div class="main">
 
-        <h1>📊 Analytics</h1>
+        <h1>📊 Analytics Dashboard</h1>
 
-        <!-- Summary Cards -->
-        <div class="cards">
-            <div class="card"><h3>Daily</h3><p>₹{{ daily }}</p></div>
-            <div class="card"><h3>Weekly</h3><p>₹{{ weekly }}</p></div>
-            <div class="card"><h3>Monthly</h3><p>₹{{ monthly }}</p></div>
+        <!-- Monthly Line Chart -->
+        <div class="card">
+            <h2>Monthly Spending (This Year)</h2>
+            <canvas id="monthlyChart"></canvas>
         </div>
 
-        <!-- Chart -->
+        <!-- Yearly Line Chart -->
         <div class="card">
-            <h2>Category Breakdown</h2>
+            <h2>Yearly Spending</h2>
+            <canvas id="yearlyChart"></canvas>
+        </div>
+
+        <!-- Pie Chart -->
+        <div class="card">
+            <h2>Category Breakdown (This Year)</h2>
             <canvas id="pieChart"></canvas>
         </div>
 
@@ -39,20 +45,46 @@
 
 </div>
 
-<div id="categories-data" style="display:none;">{{ categories | tojson }}</div>
-
 <script>
-    var categories = JSON.parse(document.getElementById('categories-data').textContent);
-    const data = {
-        labels: Object.keys(categories),
-        datasets: [{
-            data: Object.values(categories),
-        }]
-    };
+    // -------- Monthly --------
+    new Chart(document.getElementById("monthlyChart"), {
+        type: "line",
+        data: {
+            labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+            datasets: [{
+                label: "Monthly Spending",
+                data: {{ monthly | tojson }},
+                borderColor: "#4CAF50",
+                fill: false,
+                tension: 0.3
+            }]
+        }
+    });
 
+    // -------- Yearly --------
+    new Chart(document.getElementById("yearlyChart"), {
+        type: "line",
+        data: {
+            labels: {{ yearly.keys() | list | tojson }},
+            datasets: [{
+                label: "Yearly Spending",
+                data: {{ yearly.values() | list | tojson }},
+                borderColor: "#9b59b6",
+                fill: false,
+                tension: 0.3
+            }]
+        }
+    });
+
+    // -------- Pie --------
     new Chart(document.getElementById("pieChart"), {
         type: "pie",
-        data: data
+        data: {
+            labels: {{ categories.keys() | list | tojson }},
+            datasets: [{
+                data: {{ categories.values() | list | tojson }}
+            }]
+        }
     });
 </script>
 

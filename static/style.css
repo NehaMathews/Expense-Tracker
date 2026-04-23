@@ -114,6 +114,16 @@ canvas {
     margin: auto;
 }
 
+canvas {
+    max-width: 600px;
+    margin: 20px auto;
+    display: block;
+}
+
+.card h2 {
+    text-align: center;
+}
+
 /* List */
 ul {
     list-style: none;
