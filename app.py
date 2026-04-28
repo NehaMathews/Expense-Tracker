@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 import json, os
 from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = "your_secret_key_here"
 
 FILE = "expenses.json"
 BUDGET = "budgets.json"
@@ -24,9 +25,21 @@ def load_budget():
 def save_budget(data):
     json.dump(data, open(BUDGET, "w"), indent=4)
 
+USERS_FILE = "users.json"
+
+def load_users():
+    if not os.path.exists(USERS_FILE):
+        return []
+    return json.load(open(USERS_FILE))
+
+def save_users(data):
+    json.dump(data, open(USERS_FILE, "w"), indent=4)
+
 # ---------- Dashboard ----------
 @app.route("/")
 def index():
+    if "user" not in session:
+        return redirect("/login")
     data = load()
     total = sum(e["amount"] for e in data)
     budget = load_budget()
@@ -72,6 +85,8 @@ def index():
 # ---------- Add ----------
 @app.route("/add", methods=["POST"])
 def add():
+    if "user" not in session:
+        return redirect("/login")
     data = load()
     data.append({
         "amount": float(request.form["amount"]),
@@ -85,6 +100,8 @@ def add():
 # ---------- Delete ----------
 @app.route("/delete/<int:i>")
 def delete(i):
+    if "user" not in session:
+        return redirect("/login")
     data = load()
     data.pop(i)
     save(data)
@@ -93,6 +110,8 @@ def delete(i):
 # ---------- Edit ----------
 @app.route("/edit/<int:i>", methods=["POST"])
 def edit(i):
+    if "user" not in session:
+        return redirect("/login")
     data = load()
     data[i]["amount"] = float(request.form["amount"])
     data[i]["category"] = request.form["category"]
@@ -114,6 +133,8 @@ def search():
 # ---------- Budget ----------
 @app.route("/budget", methods=["GET", "POST"])
 def budget():
+    if "user" not in session:
+        return redirect("/login")
     if request.method == "POST":
         save_budget({
             "weekly": float(request.form["weekly"]),
@@ -127,6 +148,8 @@ def budget():
 # ---------- Analytics ----------
 @app.route("/analytics")
 def analytics():
+    if "user" not in session:
+        return redirect("/login")
     data = load()
     today = datetime.now()
 
@@ -160,6 +183,54 @@ def analytics():
         yearly=yearly_totals,
         categories=category_totals
     )
+
+#---------- User Authentication ----------
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        users = load_users()
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        # Check if user exists
+        for u in users:
+            if u["username"] == username:
+                return "User already exists!"
+
+        users.append({
+            "username": username,
+            "password": password
+        })
+
+        save_users(users)
+        return redirect("/login")
+
+    return render_template("register.html")
+
+#--------- Login ----------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        users = load_users()
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        for u in users:
+            if u["username"] == username and u["password"] == password:
+                session["user"] = username
+                return redirect("/")
+
+        return "Invalid credentials!"
+
+    return render_template("login.html")
+
+#--------- Logout ----------
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect("/login")
 
 if __name__ == "__main__":
     app.run(debug=True)
