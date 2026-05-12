@@ -139,3 +139,11 @@ a {
     color: red;
     margin-left: 10px;
 }
+
+.income-card {
+    background: linear-gradient(135deg, #00b894, #00cec9);
+}
+
+.balance-card {
+    background: linear-gradient(135deg, #0984e3, #6c5ce7);
+}

@@ -7,6 +7,7 @@ app.secret_key = "your_secret_key_here"
 
 FILE = "expenses.json"
 BUDGET = "budgets.json"
+INCOME = "income.json"
 
 # ---------- Load / Save ----------
 def load():
@@ -25,6 +26,14 @@ def load_budget():
 def save_budget(data):
     json.dump(data, open(BUDGET, "w"), indent=4)
 
+def load_income():
+    if not os.path.exists(INCOME):
+        return []
+    return json.load(open(INCOME))
+
+def save_income(data):
+    json.dump(data, open(INCOME, "w"), indent=4)
+
 USERS_FILE = "users.json"
 
 def load_users():
@@ -41,7 +50,10 @@ def index():
     if "user" not in session:
         return redirect("/login")
     data = load()
+    income_data = load_income()
     total = sum(e["amount"] for e in data)
+    total_income = sum(i["amount"] for i in income_data)
+    balance = total_income - total
     budget = load_budget()
     today = datetime.now()
 
@@ -74,6 +86,8 @@ def index():
     return render_template("index.html",
         expenses=data,
         total=total,
+        total_income=total_income,
+        balance=balance,
         budget=budget,
         weekly_remaining=weekly_remaining,
         monthly_remaining=monthly_remaining,
@@ -95,6 +109,23 @@ def add():
         "date": datetime.now().strftime("%Y-%m-%d")
     })
     save(data)
+    return redirect("/")
+
+# ---------- Add Income ----------
+@app.route("/add_income", methods=["POST"])
+def add_income():
+    if "user" not in session:
+        return redirect("/login")
+
+    data = load_income()
+
+    data.append({
+        "amount": float(request.form["amount"]),
+        "source": request.form["source"],
+        "date": datetime.now().strftime("%Y-%m-%d")
+    })
+
+    save_income(data)
     return redirect("/")
 
 # ---------- Delete ----------

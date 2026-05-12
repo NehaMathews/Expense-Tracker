@@ -15,6 +15,7 @@
         <a href="/analytics">📊 Analytics</a>
         <a href="/budget">💰 Budget</a>
         <a href="/logout">🚪 Logout</a>
+        <a href="/">💵 Income</a>
     </div>
 
     <!-- Main -->
@@ -25,6 +26,11 @@
             <div class="card">
                 <h3>Total Spending</h3>
                 <p>₹{{ total }}</p>
+            </div>
+
+            <div class="card income-card">
+                <h3>Total Income</h3>
+                <p>₹{{ total_income }}</p>
             </div>
 
             <div class="card">
@@ -53,6 +59,11 @@
                 <span class="danger">🚨 Exceeded</span>
                 {% endif %}
             </div>
+
+            <div class="card balance-card">
+                <h3>Current Balance</h3>
+                <p>₹{{ balance }}</p>
+            </div>
             
         </div>
 
@@ -64,6 +75,17 @@
                 <input name="category" placeholder="Category" required>
                 <input name="desc" placeholder="Description">
                 <button>Add</button>
+            </form>
+        </div>
+
+        <!-- Add Income -->
+        <div class="card">
+            <h2>Add Income</h2>
+
+            <form action="/add_income" method="post">
+                <input name="amount" placeholder="Income Amount" required>
+                <input name="source" placeholder="Income Source" required>
+                <button>Add Income</button>
             </form>
         </div>
 
